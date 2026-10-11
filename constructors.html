@@ -37,6 +37,7 @@ h1{font-size:18px;margin:0 0 4px;color:var(--ink);}
 <canvas id="c" role="img" aria-label="Line chart of cumulative 2026 F1 constructors' points by round for the selected teams, with a knockout line showing the minimum points needed to still catch the highest-ranked selected team.">Cumulative constructors' championship points by round for the selected teams, with a knockout line based on the highest-ranked selected team.</canvas>
 <div class="drag-handle" id="dragHandle" title="Drag to change the as-of round"></div>
 </div>
+<div id="endLegend" class="endLegend"></div>
 <div id="sm" style="font-size:12px;color:var(--muted);line-height:1.6;margin:10px 2px 2px;"></div>
 </div>
 <div class="card">
@@ -80,6 +81,9 @@ const rgba=(h,a)=>{
 
 let D=[], N=0, L=0, R=[], thr=[], lead=[], P, chart, usingRealCalendar=false;
 let currentYear=null, currentSeasonRounds=[], currentCalendar=null, selectedTeamIds=null;
+// issue #13 (mobile): below this width the canvas end-of-line labels (drawn by the `ends` plugin)
+// are dropped in favor of the #endLegend list below the chart, which has room to wrap.
+function isNarrow(){ return window.innerWidth<=600; }
 
 async function buildFromSelection(detail){
  currentYear = detail.year;
@@ -205,12 +209,15 @@ function draw(){
    else{ctx.fillStyle=P.pointRing;ctx.fill();ctx.strokeStyle=P.elim;ctx.lineWidth=2;ctx.stroke();}});
   ctx.restore();}};
  const ends={id:'ends',afterDatasetsDraw(ch){
+  if(isNarrow())return; // mobile: shown as a legend list below the chart instead (see #endLegend)
   const it=[];ch.data.datasets.forEach((s,i)=>{if(s.kind!=='p')return;const p=ch.getDatasetMeta(i).data[N-1];it.push({x:p.x,y:p.y,ly:p.y,s});});
   it.sort((a,b)=>a.y-b.y);for(let i=1;i<it.length;i++)if(it[i].ly-it[i-1].ly<13)it[i].ly=it[i-1].ly+13;
   const {ctx}=ch;ctx.save();ctx.font='11px '+ff;ctx.textAlign='left';ctx.textBaseline='middle';
   it.forEach(o=>{ctx.fillStyle=o.s.c;ctx.fillRect(o.x+7,o.ly-3,6,6);ctx.fillStyle=P.label;ctx.fillText(o.s.team+' '+Math.round(o.s.fin),o.x+17,o.ly);});ctx.restore();}};
+ // Reserve right padding from the widest end label so it's never clipped (none needed on mobile,
+ // where the labels move into #endLegend below the chart instead).
  const mc=document.createElement('canvas').getContext('2d');mc.font='11px '+ff;
- const PR=Math.ceil(Math.max(...ds.filter(s=>s.kind==='p').map(s=>mc.measureText(s.team+' '+Math.round(s.fin)).width)))+17+8;
+ const PR=isNarrow()?10:Math.ceil(Math.max(...ds.filter(s=>s.kind==='p').map(s=>mc.measureText(s.team+' '+Math.round(s.fin)).width)))+17+8;
  const peak=Math.max(1,...D.map(d=>Math.max(...d.full)),...thr);
  const yMax=Math.ceil(peak*1.1/50)*50;
  const yStep=yMax<=300?50:yMax<=600?100:yMax<=1200?200:500;
@@ -224,6 +231,11 @@ function draw(){
  const sw=(c,w)=>`<svg width="20" height="8" aria-hidden="true"><line x1="1" y1="4" x2="19" y2="4" stroke="${c}" stroke-width="${w||2.5}"/></svg>`;
  document.getElementById('lg').innerHTML=DC.map(d=>`<span style="display:flex;align-items:center;gap:6px;">${sw(d.c)}${d.n}</span>`).join('')
   +`<span style="display:flex;align-items:center;gap:6px;"><span style="font-weight:500;">Knockout line</span>${sw(P.knock,3)}</span>`;
+ // Mobile stand-in for the canvas end-of-line labels — same info (team + final points), ranked.
+ const legendSorted=DC.slice().sort((a,b)=>b.full[N-1]-a.full[N-1]);
+ document.getElementById('endLegend').innerHTML=legendSorted.map((d,i)=>
+  `<div class="endLegendRow"><span class="endLegendRank">${i+1}</span><span class="endLegendDot" style="background:${d.c}"></span><span class="endLegendName">${d.n}</span><span class="endLegendPts">${Math.round(d.full[N-1])}</span></div>`
+ ).join('');
  const lab=d=>`${d.n} (R${d.out+1})`;
  const now=D.filter(d=>d.out>=0&&d.out<L).sort((a,b)=>a.out-b.out),proj=D.filter(d=>d.out>=L).sort((a,b)=>a.out-b.out);
  document.getElementById('sm').innerHTML=
@@ -265,7 +277,11 @@ function positionHandle(){
 window.addEventListener('f1selection', e=>buildFromSelection(e.detail));
 window.addEventListener('f1roundchange', e=>{ if(currentSeasonRounds.length) recompute(e.detail.round); });
 window.addEventListener('themechange',draw);
-window.addEventListener('resize', ()=>{ if(chart) positionHandle(); });
+let lastNarrow=isNarrow();
+window.addEventListener('resize', ()=>{
+ if(chart) positionHandle();
+ const now=isNarrow(); if(now!==lastNarrow){ lastNarrow=now; draw(); }
+});
 F1Controls.mount('f1controls', {defaultYear:2026});
 </script>
 </div>

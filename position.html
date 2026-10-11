@@ -38,14 +38,19 @@ h1{font-size:18px;margin:0 0 4px;color:var(--ink);}
 <div id="f1controls" class="f1c"></div>
 <div class="card" style="margin-bottom:16px;">
 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;">
- <span style="font-size:12px;color:var(--sub);">Sort</span>
- <div class="btnrow" id="chartSortRow">
+ <span style="font-size:12px;color:var(--sub);" class="spacerDesktopOnly">Sort</span>
+ <div class="btnrow sortPillRow" id="chartSortRow">
   <button type="button" class="pill active" data-sort="median">Median</button>
   <button type="button" class="pill" data-sort="champ">Championship</button>
   <button type="button" class="pill" data-sort="team">Team</button>
  </div>
- <span style="flex:1;"></span>
- <div class="btnrow" id="chartOptRow">
+ <select id="chartSortSelect" class="sortSelect" aria-label="Sort">
+  <option value="median">Sort: Median</option>
+  <option value="champ">Sort: Championship</option>
+  <option value="team">Sort: Team</option>
+ </select>
+ <span style="flex:1;" class="spacerDesktopOnly"></span>
+ <div class="btnrow scrollRow" id="chartOptRow">
   <button type="button" class="pill" data-opt="below10">Below P10</button>
   <button type="button" class="pill" data-opt="mech">Mechanical DNFs</button>
   <button type="button" class="pill active" data-opt="sprint">Sprints</button>
@@ -133,6 +138,9 @@ function medianBucket(counts){
  return counts.length-1;
 }
 let currentYear=null, currentSeasonRounds=[], selectedDriverIds=null, pickerSort='team';
+// issue #13 (mobile): below this width the x-axis bucket labels (P1...P10, 11+/DNF) don't fit
+// horizontally without rotating, since autoSkip is deliberately off for the default <=12-bucket case.
+function isNarrow(){ return window.innerWidth<=600; }
 
 async function buildFromSelection(detail){
  currentYear = detail.year;
@@ -267,7 +275,8 @@ function draw(){
        }
      },
      scales:{
-       x:{grid:{color:P.grid}, ticks:{color:P.text, maxRotation:0, autoSkip:LAB.length>12}},
+       x:{grid:{color:P.grid}, ticks:{color:P.text, maxRotation:isNarrow()?60:0, minRotation:isNarrow()?60:0,
+         autoSkip:LAB.length>12, font:{size:isNarrow()?9:11}}},
        y:{
          min:-0.15, max:(n-1)*RIDGE_ROW+RIDGE_PEAK+0.25,
          grid:{display:false},
@@ -340,7 +349,15 @@ document.getElementById('chartSortRow').addEventListener('click', e=>{
  const btn=e.target.closest('button[data-sort]'); if(!btn) return;
  chartSort = btn.dataset.sort;
  document.querySelectorAll('#chartSortRow button').forEach(b=>b.classList.toggle('active', b===btn));
+ document.getElementById('chartSortSelect').value = chartSort;
  draw(); // sort only changes row order within already-computed D — no need to recompute buckets
+});
+// issue #13 (mobile): the sort pill row is replaced by this <select> on narrow screens — same
+// chartSort state, kept in sync with the pill row's active state either way.
+document.getElementById('chartSortSelect').addEventListener('change', e=>{
+ chartSort = e.target.value;
+ document.querySelectorAll('#chartSortRow button').forEach(b=>b.classList.toggle('active', b.dataset.sort===chartSort));
+ draw();
 });
 document.getElementById('chartOptRow').addEventListener('click', e=>{
  const btn=e.target.closest('button[data-opt]'); if(!btn) return;
@@ -369,6 +386,8 @@ document.getElementById('presetRow').addEventListener('click', e=>{
 window.addEventListener('f1selection', e=>buildFromSelection(e.detail));
 window.addEventListener('f1roundchange', e=>{ if(currentSeasonRounds.length) recompute(e.detail.round); });
 window.addEventListener('themechange', draw);
+let lastNarrow=isNarrow();
+window.addEventListener('resize', ()=>{ const now=isNarrow(); if(now!==lastNarrow){ lastNarrow=now; draw(); } });
 F1Controls.mount('f1controls', {defaultYear:2026});
 </script>
 </body>

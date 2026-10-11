@@ -57,3 +57,22 @@ html,body{background:var(--bg);color:var(--ink);}
 .pill{background:var(--inset);color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:11.5px;cursor:pointer;font:inherit;}
 .pill:hover{border-color:var(--ink2);}
 .pill.active{background:var(--ink);color:var(--on-ink);border-color:var(--ink);}
+
+/* issue #13 (mobile): end-of-line chart labels fold into a legend list below the chart instead of
+   squeezing the plot's right-hand padding; a sort pill row collapses to a <select>; a pill row marked
+   .scrollRow becomes a swipeable single-line strip instead of wrapping raggedly. */
+.endLegend{display:none;flex-direction:column;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+.endLegendRow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);}
+.endLegendRank{color:var(--sub);width:18px;text-align:right;flex:0 0 auto;font-variant-numeric:tabular-nums;}
+.endLegendDot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+.endLegendName{flex:1;font-weight:500;}
+.endLegendPts{color:var(--sub);font-variant-numeric:tabular-nums;flex:0 0 auto;}
+.sortSelect{display:none;font:inherit;font-size:12.5px;background:var(--inset);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;}
+@media (max-width:600px){
+  .endLegend{display:flex;}
+  .sortPillRow{display:none;}
+  .sortSelect{display:inline-block;}
+  .spacerDesktopOnly{display:none;}
+  .scrollRow{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px;margin:0 -2px;padding-left:2px;padding-right:2px;}
+  .scrollRow .pill{flex:0 0 auto;white-space:nowrap;}
+}
