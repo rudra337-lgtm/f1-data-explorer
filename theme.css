@@ -59,20 +59,22 @@ html,body{background:var(--bg);color:var(--ink);}
 .pill.active{background:var(--ink);color:var(--on-ink);border-color:var(--ink);}
 
 /* issue #13 (mobile): end-of-line chart labels fold into a legend list below the chart instead of
-   squeezing the plot's right-hand padding; a sort pill row collapses to a <select>; a pill row marked
-   .scrollRow becomes a swipeable single-line strip instead of wrapping raggedly. */
+   squeezing the plot's right-hand padding. All sort controls (chart sort, driver/team picker sort)
+   are plain <select> dropdowns at every screen size — see .ddSelect below. */
 .endLegend{display:none;flex-direction:column;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
 .endLegendRow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);}
 .endLegendRank{color:var(--sub);width:18px;text-align:right;flex:0 0 auto;font-variant-numeric:tabular-nums;}
 .endLegendDot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
 .endLegendName{flex:1;font-weight:500;}
 .endLegendPts{color:var(--sub);font-variant-numeric:tabular-nums;flex:0 0 auto;}
-.sortSelect{display:none;font:inherit;font-size:12.5px;background:var(--inset);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;}
+/* Shared visual style for a dropdown <select> used as a control (sort pickers, etc.) */
+.ddSelect{font:inherit;font-size:12.5px;background:var(--inset);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 8px;}
 @media (max-width:600px){
   .endLegend{display:flex;}
-  .sortPillRow{display:none;}
-  .sortSelect{display:inline-block;}
-  .spacerDesktopOnly{display:none;}
-  .scrollRow{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px;margin:0 -2px;padding-left:2px;padding-right:2px;}
-  .scrollRow .pill{flex:0 0 auto;white-space:nowrap;}
 }
+
+/* issue #13: display-option checkboxes (replaces a pill row for toggles like Below P10/Mechanical
+   DNFs/Sprints) — a row of label+checkbox pairs that wraps naturally at any width. */
+.optCheckRow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;}
+.optCheck{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);cursor:pointer;white-space:nowrap;}
+.optCheck input{margin:0;}

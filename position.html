@@ -38,22 +38,17 @@ h1{font-size:18px;margin:0 0 4px;color:var(--ink);}
 <div id="f1controls" class="f1c"></div>
 <div class="card" style="margin-bottom:16px;">
 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;">
- <span style="font-size:12px;color:var(--sub);" class="spacerDesktopOnly">Sort</span>
- <div class="btnrow sortPillRow" id="chartSortRow">
-  <button type="button" class="pill active" data-sort="median">Median</button>
-  <button type="button" class="pill" data-sort="champ">Championship</button>
-  <button type="button" class="pill" data-sort="team">Team</button>
- </div>
- <select id="chartSortSelect" class="sortSelect" aria-label="Sort">
-  <option value="median">Sort: Median</option>
-  <option value="champ">Sort: Championship</option>
-  <option value="team">Sort: Team</option>
+ <span style="font-size:12px;color:var(--sub);">Sort</span>
+ <select id="chartSortSelect" class="ddSelect" aria-label="Sort">
+  <option value="median">Median</option>
+  <option value="champ">Championship</option>
+  <option value="team">Team</option>
  </select>
- <span style="flex:1;" class="spacerDesktopOnly"></span>
- <div class="btnrow scrollRow" id="chartOptRow">
-  <button type="button" class="pill" data-opt="below10">Below P10</button>
-  <button type="button" class="pill" data-opt="mech">Mechanical DNFs</button>
-  <button type="button" class="pill active" data-opt="sprint">Sprints</button>
+ <span style="flex:1;"></span>
+ <div class="optCheckRow" id="chartOptRow">
+  <label class="optCheck"><input type="checkbox" data-opt="below10"> Below P10</label>
+  <label class="optCheck"><input type="checkbox" data-opt="mech"> Mechanical DNFs</label>
+  <label class="optCheck"><input type="checkbox" data-opt="sprint" checked> Sprints</label>
  </div>
 </div>
 <div class="ridgeWrap" id="ridgeWrap"><canvas id="ridgeCanvas"></canvas></div>
@@ -64,10 +59,10 @@ h1{font-size:18px;margin:0 0 4px;color:var(--ink);}
 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;">
  <span style="font-size:12px;color:var(--sub);">Drivers shown</span>
  <span style="flex:1;"></span>
- <div class="btnrow" id="sortSeg">
-  <button type="button" class="pill active" data-sort="team">By team</button>
-  <button type="button" class="pill" data-sort="rank">By ranking</button>
- </div>
+ <select id="sortSeg" class="ddSelect" aria-label="Sort drivers shown">
+  <option value="team">By team</option>
+  <option value="rank">By ranking</option>
+ </select>
 </div>
 <div class="btnrow" id="presetRow" style="margin-bottom:10px;">
  <button type="button" class="pill" data-preset="all">All</button>
@@ -345,33 +340,20 @@ function renderDriverPicker(){
  });
 }
 
-document.getElementById('chartSortRow').addEventListener('click', e=>{
- const btn=e.target.closest('button[data-sort]'); if(!btn) return;
- chartSort = btn.dataset.sort;
- document.querySelectorAll('#chartSortRow button').forEach(b=>b.classList.toggle('active', b===btn));
- document.getElementById('chartSortSelect').value = chartSort;
- draw(); // sort only changes row order within already-computed D — no need to recompute buckets
-});
-// issue #13 (mobile): the sort pill row is replaced by this <select> on narrow screens — same
-// chartSort state, kept in sync with the pill row's active state either way.
 document.getElementById('chartSortSelect').addEventListener('change', e=>{
  chartSort = e.target.value;
- document.querySelectorAll('#chartSortRow button').forEach(b=>b.classList.toggle('active', b.dataset.sort===chartSort));
- draw();
+ draw(); // sort only changes row order within already-computed D — no need to recompute buckets
 });
-document.getElementById('chartOptRow').addEventListener('click', e=>{
- const btn=e.target.closest('button[data-opt]'); if(!btn) return;
- const opt=btn.dataset.opt;
- if(opt==='below10') showBelowP10=!showBelowP10;
- else if(opt==='mech') includeMechanical=!includeMechanical;
- else if(opt==='sprint') includeSprints=!includeSprints;
- btn.classList.toggle('active');
+document.getElementById('chartOptRow').addEventListener('change', e=>{
+ const cb=e.target.closest('input[data-opt]'); if(!cb) return;
+ const opt=cb.dataset.opt;
+ if(opt==='below10') showBelowP10=cb.checked;
+ else if(opt==='mech') includeMechanical=cb.checked;
+ else if(opt==='sprint') includeSprints=cb.checked;
  recompute(L); // these all change what the buckets count — rebuild from already-loaded data, no network
 });
-document.getElementById('sortSeg').addEventListener('click', e=>{
- const btn=e.target.closest('button[data-sort]'); if(!btn) return;
- pickerSort = btn.dataset.sort;
- document.querySelectorAll('#sortSeg button').forEach(b=>b.classList.toggle('active', b===btn));
+document.getElementById('sortSeg').addEventListener('change', e=>{
+ pickerSort = e.target.value;
  renderDriverPicker();
 });
 document.getElementById('presetRow').addEventListener('click', e=>{

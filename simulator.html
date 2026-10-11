@@ -71,10 +71,10 @@ canvas{max-width:100%;}
     <div class="row" style="margin-bottom:12px;">
       <span style="font-size:12px;color:var(--sub);">Drivers tracked</span>
       <span style="flex:1;"></span>
-      <div class="btnrow" id="sortSeg">
-        <button type="button" class="pill active" data-sort="team">By team</button>
-        <button type="button" class="pill" data-sort="rank">By ranking</button>
-      </div>
+      <select id="sortSeg" class="ddSelect" aria-label="Sort drivers tracked">
+        <option value="team">By team</option>
+        <option value="rank">By ranking</option>
+      </select>
     </div>
     <div class="btnrow" id="presetRow" style="margin-bottom:10px;">
       <button type="button" class="pill" data-preset="all">All</button>
@@ -383,10 +383,8 @@ function renderDriverPicker(){
    });
  });
 }
-document.getElementById('sortSeg').addEventListener('click', e=>{
- const btn=e.target.closest('button[data-sort]'); if(!btn) return;
- pickerSort = btn.dataset.sort;
- document.querySelectorAll('#sortSeg button').forEach(b=>b.classList.toggle('active', b===btn));
+document.getElementById('sortSeg').addEventListener('change', e=>{
+ pickerSort = e.target.value;
  renderDriverPicker();
 });
 document.getElementById('presetRow').addEventListener('click', e=>{
