@@ -74,7 +74,13 @@ html,body{background:var(--bg);color:var(--ink);}
 }
 
 /* issue #13: display-option checkboxes (replaces a pill row for toggles like Below P10/Mechanical
-   DNFs/Sprints) — a row of label+checkbox pairs that wraps naturally at any width. */
+   DNFs/Sprints) — "Show" lives inside this same flex container (not a separate sibling) so it wraps
+   together with the checkboxes as one unit instead of being stranded alone on the row above them. */
 .optCheckRow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;}
+.optCheckLabel{font-size:12px;color:var(--sub);flex:0 0 auto;}
 .optCheck{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);cursor:pointer;white-space:nowrap;}
 .optCheck input{margin:0;}
+@media (max-width:420px){
+  .optCheckRow{gap:5px 10px;font-size:11.5px;}
+  .optCheckLabel,.optCheck{font-size:11.5px;}
+}
