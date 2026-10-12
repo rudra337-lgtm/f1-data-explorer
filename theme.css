@@ -13,6 +13,9 @@
   --inset:#0f1216;--ctrl:#1c2029;--ctrl-active:#262b35;--on-ink:#0f1216;
   --shadow:rgba(0,0,0,.35);--elim:#ef5350;
 }
+/* Prevents Mobile Safari from auto-inflating the font size of short, isolated text (like a lone
+   row label next to a wrapped control) beyond what its CSS actually specifies. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 html,body{background:var(--bg);color:var(--ink);}
 
 .theme-bar{display:flex;justify-content:flex-end;margin:0 0 14px;min-height:30px;}
@@ -74,13 +77,9 @@ html,body{background:var(--bg);color:var(--ink);}
 }
 
 /* issue #13: display-option checkboxes (replaces a pill row for toggles like Below P10/Mechanical
-   DNFs/Sprints) — "Show" lives inside this same flex container (not a separate sibling) so it wraps
-   together with the checkboxes as one unit instead of being stranded alone on the row above them. */
+   DNFs/Sprints) — a row of label+checkbox pairs that wraps naturally at any width. The "Show" label
+   sits on its own full-width line above this row (see position.html), so it never competes for
+   horizontal space with the checkboxes themselves. */
 .optCheckRow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;}
-.optCheckLabel{font-size:12px;color:var(--sub);flex:0 0 auto;}
 .optCheck{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2);cursor:pointer;white-space:nowrap;}
 .optCheck input{margin:0;}
-@media (max-width:420px){
-  .optCheckRow{gap:5px 10px;font-size:11.5px;}
-  .optCheckLabel,.optCheck{font-size:11.5px;}
-}
