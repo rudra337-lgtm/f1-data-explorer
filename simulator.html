@@ -71,17 +71,16 @@ canvas{max-width:100%;}
     <div class="row" style="margin-bottom:12px;">
       <span style="font-size:12px;color:var(--sub);">Drivers tracked</span>
       <span style="flex:1;"></span>
+      <span style="font-size:12px;color:var(--sub);">Sort by</span>
       <select id="sortSeg" class="ddSelect" aria-label="Sort drivers tracked">
-        <option value="team">By team</option>
-        <option value="rank">By ranking</option>
+        <option value="team">Team</option>
+        <option value="rank">Ranking</option>
       </select>
     </div>
     <div class="btnrow" id="presetRow" style="margin-bottom:10px;">
       <button type="button" class="pill" data-preset="all">All</button>
       <button type="button" class="pill" data-preset="none">None</button>
-      <button type="button" class="pill" data-preset="2">Top 2</button>
       <button type="button" class="pill" data-preset="5">Top 5</button>
-      <button type="button" class="pill" data-preset="8">Top 8</button>
       <button type="button" class="pill" data-preset="10">Top 10</button>
     </div>
     <div id="driverPicker"></div>
@@ -382,6 +381,20 @@ function renderDriverPicker(){
      onSelectionChanged();
    });
  });
+ updatePresetActive();
+}
+
+// issue #13: highlight whichever preset button (if any) exactly matches the current selection, so
+// it's clear what's picked — not highlighted at all if the selection was built by hand-checking boxes.
+function updatePresetActive(){
+ const ranked=[...fullRoster].sort((a,b)=>b.now-a.now).map(d=>d.driverId);
+ const sets = { all: fullRoster.map(d=>d.driverId), none: [], 5: ranked.slice(0,5), 10: ranked.slice(0,10) };
+ const cur = new Set(selectedDriverIds||[]);
+ let matched=null;
+ for(const [key,ids] of Object.entries(sets)){
+   if(cur.size===ids.length && ids.every(id=>cur.has(id))){ matched=key; break; }
+ }
+ document.querySelectorAll('#presetRow button[data-preset]').forEach(b=>b.classList.toggle('active', b.dataset.preset===matched));
 }
 document.getElementById('sortSeg').addEventListener('change', e=>{
  pickerSort = e.target.value;

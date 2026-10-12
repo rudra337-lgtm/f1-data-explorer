@@ -129,6 +129,21 @@ function renderTeamPicker(){
      recompute(L);
    });
  });
+ updatePresetActive();
+}
+
+// issue #13: highlight whichever preset button (if any) exactly matches the current selection, so
+// it's clear what's picked — not highlighted at all if the selection was built by hand-checking boxes.
+function updatePresetActive(){
+ const cum = F1Data.cumulative(currentSeasonRounds, L, 'include');
+ const ranked = rankedTeamIds(cum);
+ const sets = { all: Object.keys(cum.teams), none: [], 2: ranked.slice(0,2), 5: ranked.slice(0,5) };
+ const cur = new Set(selectedTeamIds||[]);
+ let matched=null;
+ for(const [key,ids] of Object.entries(sets)){
+   if(cur.size===ids.length && ids.every(id=>cur.has(id))){ matched=key; break; }
+ }
+ document.querySelectorAll('#presetRow button[data-preset]').forEach(b=>b.classList.toggle('active', b.dataset.preset===matched));
 }
 
 document.getElementById('presetRow').addEventListener('click', e=>{
